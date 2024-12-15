@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>URL Shortener Microservice</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://cdn.freecodecamp.org/universal/favicons/favicon-16x16.png"
+    />
+    <link href="/public/style.css" rel="stylesheet" type="text/css" />
+  </head>
+
+  <body>
+    <h1>URL Shortener Microservice</h1>
+    <main>
+      <section>
+        <form id="url-form">
+          <fieldset>
+            <legend>URL Shortener</legend>
+            <label for="url_input">URL:</label>
+            <input
+              id="url_input"
+              type="url"
+              name="url"
+              placeholder="https://www.example.com/"
+              required
+            />
+            <input type="submit" value="Shorten URL" />
+          </fieldset>
+        </form>
+        <div id="result" class="hidden">
+          <h2>Shortened URL:</h2>
+          <a id="short-url" href="#" target="_blank"></a>
+        </div>
+      </section>
+    </main>
+    
+
+    <script>
+      document.getElementById("url-form").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const urlInput = document.getElementById("url_input").value;
+
+        try {
+        
+          const response = await fetch("/api/shorturl", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded", 
+            },
+            body: new URLSearchParams({
+              url: urlInput, 
+            }),
+          });
+
+          const data = await response.json();
+
+          if (data.error) {
+            alert(data.error); // Menampilkan error jika URL tidak valid
+          } else {
+            // Menampilkan URL pendek jika berhasil
+            const shortUrl = `${window.location.origin}/api/shorturl/${data.short_url}`;
+            const resultDiv = document.getElementById("result");
+            const shortUrlElement = document.getElementById("short-url");
+
+            shortUrlElement.textContent = shortUrl;
+            shortUrlElement.href = shortUrl;
+
+            resultDiv.classList.remove("hidden"); // Menampilkan hasil URL pendek
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Something went wrong!"); // Menangani error lain
+        }
+      });
+    </script>
+  </body>
+</html>
